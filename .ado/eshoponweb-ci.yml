@@ -53,3 +53,19 @@ stages:
         PathtoPublish: '$(Build.SourcesDirectory)/.azure/bicep/webapp.bicep'
         ArtifactName: 'Bicep'
         publishLocation: 'Container'
+
+- stage: Deploy
+  displayName: Deploy to an Azure Web App
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'azure-connect'
+        appType: 'webApp'
+        WebAppName: 'az400m05l11-sp1'
+        packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
