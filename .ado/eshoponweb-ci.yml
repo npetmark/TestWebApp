@@ -1,6 +1,13 @@
 #NAME THE PIPELINE SAME AS FILE (WITHOUT ".yml")
 # trigger:
 # - main
+parameters:
+  - name: app
+    type: string
+    default: Web
+    values:
+      - Web
+      - Mobile
 
 resources:
   repositories:
@@ -81,4 +88,9 @@ stages:
               azureSubscription: 'azure-connect'
               appType: 'webApp'
               WebAppName: 'eshoponWebYAML1389627146'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+              deployToSlotOrASE: true
+              ResourceGroupName: 'az400m05l11-RG'
+              SlotName: 'production'
+              packageForLinux: '$(System.DefaultWorkingDirectory)/**/${{parameters.app}}.zip'
+              enableCustomDeployment: true
+              DeploymentType: 'webDeploy'
