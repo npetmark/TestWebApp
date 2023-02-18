@@ -92,9 +92,7 @@ stages:
                   inputs:
                     buildType: 'current'
                     artifactName: '${{ parameter.Key }}'
-                    itemPattern: '${{ parameter.Key }}/*.zip'
-                    targetPath: '$(Build.ArtifactStagingDirectory)'
-                    
+                    targetPath: '$(Build.ArtifactStagingDirectory)'               
                 - task: AzureRmWebAppDeployment@4
                   inputs:
                     ConnectionType: 'AzureRM'
