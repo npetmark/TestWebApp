@@ -91,6 +91,6 @@ stages:
               deployToSlotOrASE: true
               ResourceGroupName: 'az400m05l11-RG'
               SlotName: 'production'
-              packageForLinux: '$(System.DefaultWorkingDirectory)/**/${{parameters.app}}*.zip'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/${{parameters.app}}.zip'
               enableCustomDeployment: true
               DeploymentType: 'webDeploy'
