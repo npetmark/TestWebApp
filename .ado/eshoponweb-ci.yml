@@ -28,7 +28,7 @@ stages:
   jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
-        - job: Build
+        - job: ${{ parameter.Key }}
           pool:
             vmImage: ubuntu-latest
           steps:
