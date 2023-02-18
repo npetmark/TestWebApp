@@ -8,12 +8,12 @@ parameters:
     default: true
 
   - name: CustomerB
-    displayName: Customer B
+    displayName: CustomerB
     type: boolean
     default: true
 
   - name: CustomerC
-    displayName: Customer C
+    displayName: CustomerC
     type: boolean
     default: false
 
@@ -32,6 +32,7 @@ stages:
           pool:
             vmImage: ubuntu-latest
           steps:
+
           - task: DotNetCoreCLI@2
             displayName: Restore
             inputs:
