@@ -3,17 +3,17 @@
 # - main
 parameters:
   - name: Customer-A                  # Case 1; Boolean type for multiple selection"
-    displayName: Customer Alpha
+    displayName: Customer A
     type: boolean
     default: true
 
   - name: Customer-B
-    displayName: Customer Beta
+    displayName: Customer B
     type: boolean
     default: true
 
   - name: Customer-C
-    displayName: Customer Gama
+    displayName: Customer C
     type: boolean
     default: false
 
