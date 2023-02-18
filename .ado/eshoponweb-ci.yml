@@ -2,17 +2,17 @@
 # trigger:
 # - main
 parameters:
-  - name: Customer-A                  # Case 1; Boolean type for multiple selection"
+  - name: CustomerA                  # Case 1; Boolean type for multiple selection"
     displayName: Customer A
     type: boolean
     default: true
 
-  - name: Customer-B
+  - name: CustomerB
     displayName: Customer B
     type: boolean
     default: true
 
-  - name: Customer-C
+  - name: CustomerC
     displayName: Customer C
     type: boolean
     default: false
