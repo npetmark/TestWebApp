@@ -2,93 +2,108 @@
 # trigger:
 # - main
 parameters:
-  - name: app
-    type: string
-    default: Web
-    values:
-      - Web
-      - Mobile
+  - name: Customer-A                  # Case 1; Boolean type for multiple selection"
+    displayName: Customer Alpha
+    type: boolean
+    default: true
+
+  - name: Customer-B
+    displayName: Customer Beta
+    type: boolean
+    default: true
+
+  - name: Customer-C
+    displayName: Customer Gama
+    type: boolean
+    default: false
 
 resources:
   repositories:
     - repository: self
-      trigger: 
-       - main
+      trigger: none
 
 stages:
 - stage: Build
   displayName: Build .Net Core Solution
   jobs:
-  - job: Build
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: DotNetCoreCLI@2
-      displayName: Restore
-      inputs:
-        command: 'restore'
-        projects: '**/*.sln'
-        feedsToUse: 'select'
+    - ${{ each parameter in parameters }}:
+      - ${{ if eq(parameter.Value, true)}}:
+        - job: Build
+          pool:
+            vmImage: ubuntu-latest
+          steps:
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: 'restore'
+              projects: '**/*.sln'
+              feedsToUse: 'select'
 
-    - task: DotNetCoreCLI@2
-      displayName: Build
-      inputs:
-        command: 'build'
-        projects: '**/*.sln'
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: 'build'
+              projects: '**/*.sln'
+          
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: 'test'
+              projects: 'tests/UnitTests/*.csproj'
+          
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '-o $(Build.ArtifactStagingDirectory)'
+          
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Artifacts
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: '${{ parameter.Key }}'
+              publishLocation: 'Container'
     
-    - task: DotNetCoreCLI@2
-      displayName: Test
-      inputs:
-        command: 'test'
-        projects: 'tests/UnitTests/*.csproj'
-    
-    - task: DotNetCoreCLI@2
-      displayName: Publish
-      inputs:
-        command: 'publish'
-        publishWebProjects: true
-        arguments: '-o $(Build.ArtifactStagingDirectory)'
-    
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Artifacts ADO - Website
-      inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: Website
-    
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Artifacts ADO - Bicep
-      inputs:
-        PathtoPublish: '$(Build.SourcesDirectory)/.azure/bicep/webapp.bicep'
-        ArtifactName: 'Bicep'
-        publishLocation: 'Container'
+    # - task: PublishBuildArtifacts@1
+    #   displayName: Publish Artifacts ADO - Bicep
+    #   inputs:
+    #     PathtoPublish: '$(Build.SourcesDirectory)/.azure/bicep/webapp.bicep'
+    #     ArtifactName: 'Bicep'
+    #     publishLocation: 'Container'
 
 - stage: Deploy
+  dependsOn: Build
   displayName: Deploy to an Azure Web App
   jobs:
-  - deployment: Deploy
-    environment: approvals
-    pool:
-      vmImage: 'windows-2019'
+    - ${{ each parameter in parameters }}:
+      - ${{ if eq(parameter.Value, true)}}:
+        - deployment: ${{ parameter.Key}}
+          environment: approvals
 
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: DownloadBuildArtifacts@1
-            inputs:
-              buildType: 'current'
-              downloadType: 'specific'
-              downloadPath: '$(Build.ArtifactStagingDirectory)'
-              
-          - task: AzureRmWebAppDeployment@4
-            inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'azure-connect'
-              appType: 'webApp'
-              WebAppName: 'eshoponWebYAML1389627146'
-              deployToSlotOrASE: true
-              ResourceGroupName: 'az400m05l11-RG'
-              SlotName: 'production'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/${{parameters.app}}.zip'
-              enableCustomDeployment: true
-              DeploymentType: 'webDeploy'
+          pool:
+            vmImage: 'windows-2019'
+
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                - task: DownloadBuildArtifacts@1
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: '${{ parameter.Key }}'
+                    downloadPath: '$(Build.ArtifactStagingDirectory)'
+                    
+                - task: AzureRmWebAppDeployment@4
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: 'azure-connect'
+                    appType: 'webApp'
+                    WebAppName: '${{ parameter.Key }}'
+                    deployToSlotOrASE: true
+                    ResourceGroupName: 'az400m05l11-RG'
+                    SlotName: 'production'
+                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+                    enableCustomDeployment: true
+                    DeploymentType: 'webDeploy'
