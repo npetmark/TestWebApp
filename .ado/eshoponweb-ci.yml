@@ -6,6 +6,9 @@ resources:
   repositories:
     - repository: self
       trigger: none
+        # branches: 
+        #   include:
+        #     - main
 
 stages:
 - stage: Build
@@ -72,10 +75,10 @@ stages:
               downloadType: 'specific'
               downloadPath: '$(Build.ArtifactStagingDirectory)'
               
-          # - task: AzureRmWebAppDeployment@4
-          #   inputs:
-          #     ConnectionType: 'AzureRM'
-          #     azureSubscription: 'azure-connect'
-          #     appType: 'webApp'
-          #     WebAppName: 'az400m05l11-sp1'
-          #     packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'azure-connect'
+              appType: 'webApp'
+              WebAppName: 'eshoponWebYAML1389627146'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
