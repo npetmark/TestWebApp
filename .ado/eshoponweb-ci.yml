@@ -73,9 +73,43 @@ stages:
     #     ArtifactName: 'Bicep'
     #     publishLocation: 'Container'
 
-- stage: Deploy
+- stage: CodePush
   dependsOn: Build
-  displayName: Deploy to an Azure Web App
+  displayName: CodePush
+  jobs:
+    - ${{ each parameter in parameters }}:
+      - ${{ if eq(parameter.Value, true)}}:
+        - deployment: ${{ parameter.Key}}
+          environment: approvals
+
+          pool:
+            vmImage: 'windows-2019'
+
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    buildType: 'current'
+                    artifactName: '${{ parameter.Key }}'
+                    targetPath: '$(Build.ArtifactStagingDirectory)'               
+                - task: AzureRmWebAppDeployment@4
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: 'azure-connect'
+                    appType: 'webApp'
+                    WebAppName: '${{ parameter.Key }}'
+                    deployToSlotOrASE: true
+                    ResourceGroupName: 'az400m05l11-RG'
+                    SlotName: 'production'
+                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+                    enableCustomDeployment: true
+                    DeploymentType: 'webDeploy'
+
+- stage: AppCenterDeploy
+  dependsOn: Build
+  displayName: AppCenterDeploy
   jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
