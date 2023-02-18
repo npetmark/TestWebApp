@@ -93,6 +93,7 @@ stages:
                     buildType: 'current'
                     downloadType: 'single'
                     artifactName: '${{ parameter.Key }}'
+                    itemPattern: '${{ parameter.Key }}/**.*'
                     downloadPath: '$(Build.ArtifactStagingDirectory)'
                     
                 - task: AzureRmWebAppDeployment@4
