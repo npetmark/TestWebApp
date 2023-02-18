@@ -12,10 +12,8 @@ parameters:
 resources:
   repositories:
     - repository: self
-      trigger: none
-        # branches: 
-        #   include:
-        #     - main
+      trigger: 
+       - main
 
 stages:
 - stage: Build
