@@ -151,9 +151,7 @@ stages:
 
 - stage: AppCenterDeploy
   condition: succeededOrFailed()
-  dependsOn: 
-    - Build_ios
-    - Build_android
+  dependsOn: CodePush
   displayName: AppCenterDeploy
   jobs:
     - ${{ each parameter in parameters }}:
