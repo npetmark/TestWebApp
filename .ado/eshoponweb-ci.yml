@@ -20,7 +20,7 @@ parameters:
   - name: CustomerD
     displayName: CustomerD
     type: boolean
-    default: true
+    default: false
 
 resources:
   repositories:
