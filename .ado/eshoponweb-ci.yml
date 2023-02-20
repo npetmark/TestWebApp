@@ -133,7 +133,8 @@ stages:
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     buildType: 'current'
-                    artifactName: '${{ parameter.Key }}_*'
+                    artifactName: '${{ parameter.Key }}'
+                    itemPattern: '${{ parameter.Key }}*/*'
                     targetPath: '$(Build.ArtifactStagingDirectory)'
                 # - task: AzureRmWebAppDeployment@4
                 #   inputs:
@@ -170,7 +171,8 @@ stages:
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     buildType: 'current'
-                    artifactName: '${{ parameter.Key }}_*'
+                    artifactName: '${{ parameter.Key }}'
+                    itemPattern: '${{ parameter.Key }}*/*'
                     targetPath: '$(Build.ArtifactStagingDirectory)'
                 # - task: AzureRmWebAppDeployment@4
                 #   inputs:
