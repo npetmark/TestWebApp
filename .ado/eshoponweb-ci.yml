@@ -15,7 +15,7 @@ parameters:
   - name: CustomerC
     displayName: CustomerC
     type: boolean
-    default: false
+    default: true
 
 resources:
   repositories:
