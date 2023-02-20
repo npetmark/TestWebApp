@@ -132,20 +132,20 @@ stages:
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     buildType: 'current'
-                    artifactName: '${{ parameter.Key }}'
-                    targetPath: '$(Build.ArtifactStagingDirectory)'               
-                - task: AzureRmWebAppDeployment@4
-                  inputs:
-                    ConnectionType: 'AzureRM'
-                    azureSubscription: 'azure-connect'
-                    appType: 'webApp'
-                    WebAppName: '${{ parameter.Key }}'
-                    deployToSlotOrASE: true
-                    ResourceGroupName: 'az400m05l11-RG'
-                    SlotName: 'production'
-                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
-                    enableCustomDeployment: true
-                    DeploymentType: 'webDeploy'
+                    artifactName: '${{ parameter.Key }}_*'
+                    targetPath: '$(Build.ArtifactStagingDirectory)'
+                # - task: AzureRmWebAppDeployment@4
+                #   inputs:
+                #     ConnectionType: 'AzureRM'
+                #     azureSubscription: 'azure-connect'
+                #     appType: 'webApp'
+                #     WebAppName: '${{ parameter.Key }}'
+                #     deployToSlotOrASE: true
+                #     ResourceGroupName: 'az400m05l11-RG'
+                #     SlotName: 'production'
+                #     packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+                #     enableCustomDeployment: true
+                #     DeploymentType: 'webDeploy'
 
 - stage: AppCenterDeploy
   dependsOn: 
@@ -168,17 +168,17 @@ stages:
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     buildType: 'current'
-                    artifactName: '${{ parameter.Key }}'
-                    targetPath: '$(Build.ArtifactStagingDirectory)'               
-                - task: AzureRmWebAppDeployment@4
-                  inputs:
-                    ConnectionType: 'AzureRM'
-                    azureSubscription: 'azure-connect'
-                    appType: 'webApp'
-                    WebAppName: '${{ parameter.Key }}'
-                    deployToSlotOrASE: true
-                    ResourceGroupName: 'az400m05l11-RG'
-                    SlotName: 'production'
-                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
-                    enableCustomDeployment: true
-                    DeploymentType: 'webDeploy'
+                    artifactName: '${{ parameter.Key }}_*'
+                    targetPath: '$(Build.ArtifactStagingDirectory)'
+                # - task: AzureRmWebAppDeployment@4
+                #   inputs:
+                #     ConnectionType: 'AzureRM'
+                #     azureSubscription: 'azure-connect'
+                #     appType: 'webApp'
+                #     WebAppName: '${{ parameter.Key }}'
+                #     deployToSlotOrASE: true
+                #     ResourceGroupName: 'az400m05l11-RG'
+                #     SlotName: 'production'
+                #     packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+                #     enableCustomDeployment: true
+                #     DeploymentType: 'webDeploy'
