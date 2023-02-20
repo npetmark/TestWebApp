@@ -130,12 +130,12 @@ stages:
             runOnce:
               deploy:
                 steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    artifactName: '${{ parameter.Key }}'
-                    itemPattern: '${{ parameter.Key }}*/*'
-                    targetPath: '$(Build.ArtifactStagingDirectory)'
+                  - task: DownloadBuildArtifacts@1
+                    inputs:
+                      buildType: 'current'
+                      downloadType: 'specific'
+                      itemPattern: '${{ parameter.key }}_*/*'
+                      downloadPath: '$(System.ArtifactsDirectory)'
                 # - task: AzureRmWebAppDeployment@4
                 #   inputs:
                 #     ConnectionType: 'AzureRM'
@@ -168,12 +168,12 @@ stages:
             runOnce:
               deploy:
                 steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    artifactName: '${{ parameter.Key }}'
-                    itemPattern: '${{ parameter.Key }}*/*'
-                    targetPath: '$(Build.ArtifactStagingDirectory)'
+                  - task: DownloadBuildArtifacts@1
+                    inputs:
+                      buildType: 'current'
+                      downloadType: 'specific'
+                      itemPattern: '${{ parameter.Key }}_*/*'
+                      downloadPath: '$(System.ArtifactsDirectory)'
                 # - task: AzureRmWebAppDeployment@4
                 #   inputs:
                 #     ConnectionType: 'AzureRM'
