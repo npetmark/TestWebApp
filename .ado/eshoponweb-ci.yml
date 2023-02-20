@@ -17,6 +17,11 @@ parameters:
     type: boolean
     default: true
 
+  - name: CustomerD
+    displayName: CustomerD
+    type: boolean
+    default: true
+
 resources:
   repositories:
     - repository: self
