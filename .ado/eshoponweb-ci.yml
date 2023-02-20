@@ -25,7 +25,7 @@ resources:
 stages:
 - stage: Build_ios
   dependsOn: []
-  displayName: Build .Net Core Solution
+  displayName: Build iOS
   jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
@@ -69,7 +69,7 @@ stages:
 
 - stage: Build_android
   dependsOn: []
-  displayName: Build .Net Core Solution
+  displayName: Build Android
   jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
