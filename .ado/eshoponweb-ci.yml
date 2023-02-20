@@ -66,13 +66,6 @@ stages:
               ArtifactName: '${{ parameter.Key }}'
               publishLocation: 'Container'
     
-    # - task: PublishBuildArtifacts@1
-    #   displayName: Publish Artifacts ADO - Bicep
-    #   inputs:
-    #     PathtoPublish: '$(Build.SourcesDirectory)/.azure/bicep/webapp.bicep'
-    #     ArtifactName: 'Bicep'
-    #     publishLocation: 'Container'
-
 - stage: CodePush
   dependsOn: Build
   displayName: CodePush
