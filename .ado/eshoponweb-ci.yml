@@ -112,6 +112,7 @@ stages:
               publishLocation: 'Container'
     
 - stage: CodePush
+  condition: succeededOrFailed()
   dependsOn: 
     - Build_ios
     - Build_android
@@ -148,6 +149,7 @@ stages:
                 #     DeploymentType: 'webDeploy'
 
 - stage: AppCenterDeploy
+  condition: succeededOrFailed()
   dependsOn: 
     - Build_ios
     - Build_android
