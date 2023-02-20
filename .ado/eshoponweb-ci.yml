@@ -24,6 +24,7 @@ resources:
 
 stages:
 - stage: Build_ios
+  dependsOn: []
   displayName: Build .Net Core Solution
   jobs:
     - ${{ each parameter in parameters }}:
@@ -67,6 +68,7 @@ stages:
               publishLocation: 'Container'
 
 - stage: Build_android
+  dependsOn: []
   displayName: Build .Net Core Solution
   jobs:
     - ${{ each parameter in parameters }}:
@@ -110,7 +112,9 @@ stages:
               publishLocation: 'Container'
     
 - stage: CodePush
-  dependsOn: Build
+  dependsOn: 
+    - Build_ios
+    - Build_android
   displayName: CodePush
   jobs:
     - ${{ each parameter in parameters }}:
@@ -144,7 +148,9 @@ stages:
                     DeploymentType: 'webDeploy'
 
 - stage: AppCenterDeploy
-  dependsOn: Build
+  dependsOn: 
+    - Build_ios
+    - Build_android
   displayName: AppCenterDeploy
   jobs:
     - ${{ each parameter in parameters }}:
