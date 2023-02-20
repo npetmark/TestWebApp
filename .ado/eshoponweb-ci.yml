@@ -23,7 +23,7 @@ resources:
       trigger: none
 
 stages:
-- stage: Build
+- stage: Build_ios
   displayName: Build .Net Core Solution
   jobs:
     - ${{ each parameter in parameters }}:
@@ -63,7 +63,50 @@ stages:
             displayName: Publish Artifacts
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: '${{ parameter.Key }}'
+              ArtifactName: '"${{ parameter.Key }}_ios"'
+              publishLocation: 'Container'
+
+- stage: Build_android
+  displayName: Build .Net Core Solution
+  jobs:
+    - ${{ each parameter in parameters }}:
+      - ${{ if eq(parameter.Value, true)}}:
+        - job: '${{ parameter.Key }}'
+          pool:
+            vmImage: ubuntu-latest
+          steps:
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: 'restore'
+              projects: '**/*.sln'
+              feedsToUse: 'select'
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: 'build'
+              projects: '**/*.sln'
+          
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: 'test'
+              projects: 'tests/UnitTests/*.csproj'
+          
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: 'publish'
+              publishWebProjects: true
+              arguments: '-o $(Build.ArtifactStagingDirectory)'
+          
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Artifacts
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: '"${{ parameter.Key }}_android"'
               publishLocation: 'Container'
     
 - stage: CodePush
