@@ -31,7 +31,7 @@ stages:
       - ${{ if eq(parameter.Value, true)}}:
         - job: '${{ parameter.Key }}'
           pool:
-            vmImage: ubuntu-latest
+            vmImage: macOS-latest
           steps:
 
           - task: DotNetCoreCLI@2
