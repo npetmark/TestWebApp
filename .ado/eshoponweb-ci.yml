@@ -64,7 +64,7 @@ stages:
             displayName: Publish Artifacts
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: '"${{ parameter.Key }}_ios"'
+              ArtifactName: '${{ parameter.Key }}_ios'
               publishLocation: 'Container'
 
 - stage: Build_android
@@ -108,7 +108,7 @@ stages:
             displayName: Publish Artifacts
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: '"${{ parameter.Key }}_android"'
+              ArtifactName: '${{ parameter.Key }}_android'
               publishLocation: 'Container'
     
 - stage: CodePush
