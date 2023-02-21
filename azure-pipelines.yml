@@ -1,0 +1,291 @@
+parameters:
+  - name: 'PartnersPersonnel'
+    displayName: 'Partners Personnel'
+    type: boolean
+    default: true
+#Add a parameter for each tenant
+
+variables:
+  - name: 'environment'
+    value: Development
+  
+  - name: 'storageaccount'
+    value: buzzwhitelabeldevstorage
+
+
+trigger: none
+
+stages:
+  - stage: Build_iOS
+    jobs:
+    - ${{ each parameter in parameters }}:
+      - ${{ if eq(parameter.Value, true)}}:
+        - job: ${{ parameter.Key }}
+          displayName: ${{ parameter.Key }}
+          timeoutInMinutes: 360
+          cancelTimeoutInMinutes: 2
+          pool:
+            vmImage: macOS-12
+          steps:
+          - checkout: self
+            persistCredentials: true
+            clean: true
+          - task: AzureCLI@2
+            displayName: 'Azure CLI '
+            inputs:
+              azureSubscription: BuzzWhiteLabelDev Azure RG
+              scriptType: pscore
+              scriptLocation: inlineScript
+              inlineScript: |
+                  az storage blob download-batch -d $(Build.SourcesDirectory) --pattern env.whitelabel -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                  az storage blob download-batch -d $(Build.SourcesDirectory)/ios/employeecompanion/whitelabel/Images.xcassets/AppIcon.appiconset --pattern iosappicon.png -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                  az storage blob download-batch -d $(Build.SourcesDirectory)/ios/employeecompanion/whitelabel/Images.xcassets/AppIcon.appiconset --pattern Contents.json -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                  az storage blob download-batch -d $(Build.SourcesDirectory)/ios/employeecompanion/whitelabel/Images.xcassets/LaunchScreen-image.imageset --pattern *.png -s ${{ parameter.Key }}-launchscreen --account-name $(storageaccount) --overwrite true
+                  az storage blob download-batch -d $(Build.SourcesDirectory)/ios/employeecompanion/whitelabel/Images.xcassets/LaunchScreen-image.imageset --pattern Contents.json -s ${{ parameter.Key }}-launchscreen --account-name $(storageaccount) --overwrite true
+                  echo "$(ls $(Build.SourcesDirectory)/ios/employeecompanion/whitelabel/Images.xcassets)"
+
+          - script: |
+                  sh change-bundle-id.sh -b $(script-para)
+            displayName: 'bandle id fix'
+          - task: NodeTool@0
+            displayName: 'Install Node'
+            inputs:
+              versionSpec: '16.13.2' # you can use your desired version here
+          - script: yarn install
+            displayName: Install Dependencies
+          - script: |
+                  newVer=$(jq -r ".version" package.json) 
+                  # Extract new version of package.json
+                  echo "##vso[task.setvariable variable=NEW_VERSION]$newVer" 
+                  # Set environment variables
+            displayName: 'Set variables'
+
+          - task: AzureKeyVault@2
+            inputs:
+              azureSubscription: 'BuzzWhiteLabelDev Azure RG'
+              KeyVaultName: '${{ parameter.Key }}-$(environment)'
+              SecretsFilter: '*'
+              RunAsPreJob: true
+
+          - task: InstallAppleCertificate@2
+            displayName: Install Apple Certificate
+            inputs:
+              certSecureFile: '${{ parameter.Key }}-$(environment).p12'     #change
+              certPwd: '$(ios-password)'      #change
+              keychain: 'temp'
+              deleteCert: true
+          - task: InstallAppleProvisioningProfile@1
+            displayName: 'Install Apple Provisioning Profile'
+            inputs:
+              provisioningProfileLocation: 'secureFiles'
+              provProfileSecureFile: '${{ parameter.Key }}-$(environment).mobileprovision'    #change
+              removeProfile: true
+          - task: CocoaPods@0
+            displayName: 'Install CocoaPods'
+            inputs:
+              workingDirectory: 'ios'
+          - task: Xcode@5
+            displayName: 'Build IPA'
+            inputs:
+              actions: 'build'
+              configuration: 'Release'
+              sdk: 'iphoneos'
+              args: NEW_VERSION=$(Build.BuildId) DISPLAY_NAME="$(Customer-Name)"
+              xcWorkspacePath: 'ios/employeecompanion.xcworkspace'
+              scheme: '$(ios-command)'
+              xcodeVersion: 13
+              packageApp: true
+              exportPath: 'output'
+              signingOption: 'manual'
+              signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'     #change
+              provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'       #change
+          - task: CopyFiles@2
+            displayName: 'Copy IPA'
+            inputs:
+              contents: '**/*.ipa'
+              targetFolder: '$(build.ArtifactStagingDirectory)'
+              overWrite: true
+              flattenFolders: true
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish IPA to artifacts'
+            inputs:
+              PathtoPublish: '$(build.ArtifactStagingDirectory)'
+              ArtifactName: ${{ parameter.Key }}_ios
+              publishLocation: 'Container'
+
+  - stage: Build_Android
+    jobs:
+      - ${{ each parameter in parameters }}:
+        - ${{ if eq(parameter.Value, true)}}:
+          - job: ${{ parameter.Key }}
+            displayName: ${{ parameter.Key }}
+            timeoutInMinutes: 360
+            cancelTimeoutInMinutes: 2
+            pool:
+              vmImage: 'ubuntu-latest'
+            steps:
+            - checkout: self
+              persistCredentials: true
+              clean: true
+            - task: AzureKeyVault@2
+              inputs:
+                  azureSubscription: 'BuzzWhiteLabelDev Azure RG'
+                  KeyVaultName: '${{ parameter.Key }}-$(environment)'
+                  SecretsFilter: '*'
+                  RunAsPreJob: true
+            - task: AzureCLI@2
+              displayName: 'Azure CLI '
+              inputs:
+                  azureSubscription: BuzzWhiteLabelDev Azure RG
+                  scriptType: pscore
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    az storage blob download-batch -d $(Build.SourcesDirectory) --pattern env.whitelabel -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                    cd $(Build.SourcesDirectory)/android/app/src/whitelabel/res
+                    az storage blob download-batch -d $(Build.SourcesDirectory)/android/app/src/whitelabel/res/values --pattern *.xml -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                    az storage blob download-batch -d $(Build.SourcesDirectory)/android/app/src/whitelabel/res --pattern drawable* -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                    az storage blob download-batch -d $(Build.SourcesDirectory)/android/app/src/whitelabel/res --pattern mipmap* -s ${{ parameter.Key }} --account-name $(storageaccount) --overwrite true
+                    echo "$(ls -R $(Build.SourcesDirectory))"
+            - task: NodeTool@0
+              inputs:
+                  versionSpec: '14.x'
+            - task: CmdLine@2
+              displayName: 'Install Dependencies'
+              inputs:
+                  script: yarn install
+
+            - script: |
+                  newVer=$(jq -r ".version" package.json)
+                  echo "##vso[task.setvariable variable=NEW_VERSION]$newVer"
+              displayName: 'Set variables'
+
+            - task: Gradle@3
+              inputs:
+                  gradleWrapperFile: 'android/gradlew'
+                  workingDirectory: 'android/'
+                  options: '-PversionName=$(NEW_VERSION) -PversionCode=$(Build.BuildId) -stacktrace'
+                  tasks: '$(android-command)'
+                  publishJUnitResults: true
+                  testResultsFiles: '**/TEST-*.xml'
+                  javaHomeOption: 'JDKVersion'
+                  sonarQubeRunAnalysis: false
+                  spotBugsAnalysis: false
+            - task: AndroidSigning@3
+              inputs:
+                  apkFiles: '**/*.apk'
+                  apksignerKeystoreFile: 'dev-key.keystore'                   #change it with ${{ parameters.name }} after partner personnal would provide their .keystore
+                  apksignerKeystorePassword: '$(AndroidKeyStorePassword)'
+                  apksignerKeystoreAlias: '$(AndroidKeyAlias)'
+                  apksignerKeyPassword: '$(AndroidKeyAliasPassword)'
+                  zipalign: true
+            - task: CopyFiles@2
+              inputs:
+                  Contents: '**/*.apk'
+                  TargetFolder: '$(build.ArtifactStagingDirectory)'
+            - task: PublishBuildArtifacts@1
+              inputs:
+                  PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                  ArtifactName: ${{ parameter.Key}}_android
+                  publishLocation: 'Container'
+
+  - stage: CodePush
+    jobs:
+      - ${{ each parameter in parameters }}:
+        - ${{ if eq(parameter.Value, true)}}:
+          - job: ${{ parameter.Key }}
+            displayName: ${{ parameter.Key }}
+            timeoutInMinutes: 360
+            cancelTimeoutInMinutes: 2
+            pool:
+              vmImage: 'macOS-12'
+            steps:
+              - checkout: self
+                persistCredentials: true
+                clean: true
+              
+              - task: DownloadBuildArtifacts@1
+                inputs:
+                  buildType: 'current'
+                  downloadType: 'specific'
+                  itemPattern: |
+                    ${{ parameter.Key }}*/*.apk
+                    ${{ parameter.Key }}*/*.ipa
+                  downloadPath: '$(System.ArtifactsDirectory)'
+              - task: AzureKeyVault@2
+                inputs:
+                  azureSubscription: 'BuzzWhiteLabelDev Azure RG'
+                  KeyVaultName: '${{ parameter.Key }}- $(environment)'
+                  SecretsFilter: '*'
+                  RunAsPreJob: true
+              - task: NodeTool@0
+                displayName: 'Use Node 14.x'
+                inputs:
+                  versionSpec: 14.x
+              - task: YarnInstaller@3
+                displayName: Install Dependencies
+                inputs:
+                  versionSpec: '1.x'
+
+              - task: Yarn@2
+                displayName: 'Clean Cashe'
+                inputs:
+                  Arguments: 'cache clean'
+              - task: Yarn@2
+                displayName: 'Yarn install'
+                inputs:
+                  Arguments: install
+              - task: Yarn@2
+                displayName: 'Yarn rninfo'
+                inputs:
+                  Arguments: rninfo
+              - task: Yarn@2
+                displayName: 'Yarn extrainfo'
+                inputs:
+                  Arguments: extrainfo
+              - task: Yarn@2
+                displayName: 'CodePush to Dev'
+                inputs:
+                  Arguments: 'deployCodePushWhitelabelVersion --accessToken=$(admin-tempworks-api-token) --privateKey=$(code-sign-private-key) --iosAppName=$(ios-appcenter-app-name) --androidAppName=$(android-appcenter-app-name)  --environment=$(environment)'
+
+  - stage: AppCenterDistribute
+    jobs:
+      - ${{ each parameter in parameters }}:
+        - ${{ if eq(parameter.Value, true)}}:
+          - job: ${{ parameter.Key }}
+            displayName: ${{ parameter.Key }}
+            timeoutInMinutes: 360
+            cancelTimeoutInMinutes: 2
+            pool:
+              vmImage: 'macOS-12'
+            steps:
+              - checkout: self
+                persistCredentials: true
+                clean: true
+              
+              - task: DownloadBuildArtifacts@1
+                inputs:
+                  buildType: 'current'
+                  downloadType: 'specific'
+                  itemPattern: |
+                    ${{ parameter.Key }}*/*.apk
+                    ${{ parameter.Key }}*/*.ipa
+                  downloadPath: '$(System.ArtifactsDirectory)'
+              - task: AppCenterDistribute@3
+                inputs:
+                  serverEndpoint: '${{ parameter.Key }}-$(environment)-WL-ios'
+                  appSlug: '$(app-dist-pass)' # ?? why different
+                  appFile: '**/*.ipa'
+                  releaseNotesOption: 'input'
+                  releaseNotesInput: '$(Build.SourceVersionMessage)'
+                  destinationType: 'store'
+                  destinationStoreId: '$(ios-dev-test-storeid)'
+              - task: AppCenterDistribute@3
+                inputs:
+                  serverEndpoint: '${{ parameter.Key }}-$(environment)-WL-android'
+                  appSlug: 'TempWorks/${{ parameter.Key }}-Whitelabel-Android' # ?? why different
+                  appFile: '**/app-*-unsigned.apk'
+                  symbolsOption: 'Android'
+                  releaseNotesOption: 'input'
+                  releaseNotesInput: 'F1'
+                  destinationType: 'groups'
+                  distributionGroupId: '$(android-dev-id)'         #change that with the variable group$(android-dev-id)
