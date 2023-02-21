@@ -17,6 +17,7 @@ trigger: none
 
 stages:
   - stage: Build_iOS
+    dependsOn: []
     jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
@@ -114,6 +115,7 @@ stages:
               publishLocation: 'Container'
 
   - stage: Build_Android
+    dependsOn: []
     jobs:
       - ${{ each parameter in parameters }}:
         - ${{ if eq(parameter.Value, true)}}:
@@ -189,6 +191,9 @@ stages:
                   publishLocation: 'Container'
 
   - stage: CodePush
+    dependsOn:
+      - Build_iOS
+      - Build_android
     jobs:
       - ${{ each parameter in parameters }}:
         - ${{ if eq(parameter.Value, true)}}:
@@ -248,6 +253,8 @@ stages:
                   Arguments: 'deployCodePushWhitelabelVersion --accessToken=$(admin-tempworks-api-token) --privateKey=$(code-sign-private-key) --iosAppName=$(ios-appcenter-app-name) --androidAppName=$(android-appcenter-app-name)  --environment=$(environment)'
 
   - stage: AppCenterDistribute
+    dependsOn:
+      - CodePush
     jobs:
       - ${{ each parameter in parameters }}:
         - ${{ if eq(parameter.Value, true)}}:
