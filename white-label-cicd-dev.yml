@@ -194,63 +194,68 @@ stages:
     dependsOn:
       - Build_iOS
       - Build_android
+    
     jobs:
       - ${{ each parameter in parameters }}:
         - ${{ if eq(parameter.Value, true)}}:
-          - job: ${{ parameter.Key }}
-            displayName: ${{ parameter.Key }}
+          - deployment: ${{ parameter.Key }}
             timeoutInMinutes: 360
             cancelTimeoutInMinutes: 2
+            environment: Approvals
+
             pool:
               vmImage: 'macOS-12'
-            steps:
-              - checkout: self
-                persistCredentials: true
-                clean: true
-              
-              - task: DownloadBuildArtifacts@1
-                inputs:
-                  buildType: 'current'
-                  downloadType: 'specific'
-                  itemPattern: |
-                    ${{ parameter.Key }}*/*.apk
-                    ${{ parameter.Key }}*/*.ipa
-                  downloadPath: '$(System.ArtifactsDirectory)'
-              - task: AzureKeyVault@2
-                inputs:
-                  azureSubscription: 'BuzzWhiteLabelDev Azure RG'
-                  KeyVaultName: '${{ parameter.Key }}- $(environment)'
-                  SecretsFilter: '*'
-                  RunAsPreJob: true
-              - task: NodeTool@0
-                displayName: 'Use Node 14.x'
-                inputs:
-                  versionSpec: 14.x
-              - task: YarnInstaller@3
-                displayName: Install Dependencies
-                inputs:
-                  versionSpec: '1.x'
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - checkout: self
+                      persistCredentials: true
+                      clean: true
+                    
+                    - task: DownloadBuildArtifacts@1
+                      inputs:
+                        buildType: 'current'
+                        downloadType: 'specific'
+                        itemPattern: |
+                          ${{ parameter.Key }}*/*.apk
+                          ${{ parameter.Key }}*/*.ipa
+                        downloadPath: '$(System.ArtifactsDirectory)'
+                    - task: AzureKeyVault@2
+                      inputs:
+                        azureSubscription: 'BuzzWhiteLabelDev Azure RG'
+                        KeyVaultName: '${{ parameter.Key }}- $(environment)'
+                        SecretsFilter: '*'
+                        RunAsPreJob: true
+                    - task: NodeTool@0
+                      displayName: 'Use Node 14.x'
+                      inputs:
+                        versionSpec: 14.x
+                    - task: YarnInstaller@3
+                      displayName: Install Dependencies
+                      inputs:
+                        versionSpec: '1.x'
 
-              - task: Yarn@2
-                displayName: 'Clean Cashe'
-                inputs:
-                  Arguments: 'cache clean'
-              - task: Yarn@2
-                displayName: 'Yarn install'
-                inputs:
-                  Arguments: install
-              - task: Yarn@2
-                displayName: 'Yarn rninfo'
-                inputs:
-                  Arguments: rninfo
-              - task: Yarn@2
-                displayName: 'Yarn extrainfo'
-                inputs:
-                  Arguments: extrainfo
-              - task: Yarn@2
-                displayName: 'CodePush to Dev'
-                inputs:
-                  Arguments: 'deployCodePushWhitelabelVersion --accessToken=$(admin-tempworks-api-token) --privateKey=$(code-sign-private-key) --iosAppName=$(ios-appcenter-app-name) --androidAppName=$(android-appcenter-app-name)  --environment=$(environment)'
+                    - task: Yarn@2
+                      displayName: 'Clean Cashe'
+                      inputs:
+                        Arguments: 'cache clean'
+                    - task: Yarn@2
+                      displayName: 'Yarn install'
+                      inputs:
+                        Arguments: install
+                    - task: Yarn@2
+                      displayName: 'Yarn rninfo'
+                      inputs:
+                        Arguments: rninfo
+                    - task: Yarn@2
+                      displayName: 'Yarn extrainfo'
+                      inputs:
+                        Arguments: extrainfo
+                    - task: Yarn@2
+                      displayName: 'CodePush to Dev'
+                      inputs:
+                        Arguments: 'deployCodePushWhitelabelVersion --accessToken=$(admin-tempworks-api-token) --privateKey=$(code-sign-private-key) --iosAppName=$(ios-appcenter-app-name) --androidAppName=$(android-appcenter-app-name)  --environment=$(environment)'
 
   - stage: AppCenterDistribute
     dependsOn:
