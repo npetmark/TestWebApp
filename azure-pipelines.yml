@@ -271,6 +271,7 @@ stages:
                     ${{ parameter.Key }}*/*.ipa
                   downloadPath: '$(System.ArtifactsDirectory)'
               - task: AppCenterDistribute@3
+                displayName: iOS App Center Distribute
                 inputs:
                   serverEndpoint: '${{ parameter.Key }}-$(environment)-WL-ios'
                   appSlug: '$(app-dist-pass)' # ?? why different
@@ -280,12 +281,13 @@ stages:
                   destinationType: 'store'
                   destinationStoreId: '$(ios-dev-test-storeid)'
               - task: AppCenterDistribute@3
+                displayName: Android App Center Distribute
                 inputs:
                   serverEndpoint: '${{ parameter.Key }}-$(environment)-WL-android'
                   appSlug: 'TempWorks/${{ parameter.Key }}-Whitelabel-Android' # ?? why different
-                  appFile: '**/app-*-unsigned.apk'
+                  appFile: '**/*.apk'
                   symbolsOption: 'Android'
                   releaseNotesOption: 'input'
-                  releaseNotesInput: 'F1'
+                  releaseNotesInput: '$(Build.SourceVersionMessage)'
                   destinationType: 'groups'
                   distributionGroupId: '$(android-dev-id)'         #change that with the variable group$(android-dev-id)
