@@ -15,7 +15,7 @@ parameters:
   - name: CustomerC
     displayName: CustomerC
     type: boolean
-    default: true
+    default: false
 
   - name: CustomerD
     displayName: CustomerD
@@ -155,7 +155,7 @@ stages:
                 #     DeploymentType: 'webDeploy'
 
 - stage: AppCenterDeploy
-  condition: succeededOrFailed()
+  # condition: succeededOrFailed()
   dependsOn: CodePush
   displayName: AppCenterDeploy
   jobs:
