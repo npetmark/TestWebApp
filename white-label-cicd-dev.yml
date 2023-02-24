@@ -2,6 +2,11 @@ parameters:
   - name: 'PartnersPersonnel'
     displayName: 'Partners Personnel'
     type: boolean
+    default: true
+
+  - name: 'CustomerA'
+    displayName: 'Partners Personnel'
+    type: boolean
     default: false
 #Add a parameter for each tenant
 
@@ -21,7 +26,7 @@ stages:
     jobs:
     - ${{ each parameter in parameters }}:
       - ${{ if eq(parameter.Value, true)}}:
-        - job: ${{ parameter.Key }}
+        - job: ${{ parameter.Key }}_build
           displayName: ${{ parameter.Key }}
           timeoutInMinutes: 360
           cancelTimeoutInMinutes: 2
@@ -119,7 +124,7 @@ stages:
     jobs:
       - ${{ each parameter in parameters }}:
         - ${{ if eq(parameter.Value, true)}}:
-          - job: ${{ parameter.Key }}
+          - job: ${{ parameter.Key }}_build
             displayName: ${{ parameter.Key }}
             timeoutInMinutes: 360
             cancelTimeoutInMinutes: 2
