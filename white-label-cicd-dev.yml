@@ -2,7 +2,7 @@ parameters:
   - name: 'PartnersPersonnel'
     displayName: 'Partners Personnel'
     type: boolean
-    default: true
+    default: false
 #Add a parameter for each tenant
 
 variables:
