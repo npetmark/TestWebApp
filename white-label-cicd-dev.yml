@@ -2,12 +2,12 @@ parameters:
   - name: 'PartnersPersonnel'
     displayName: 'Partners Personnel'
     type: boolean
-    default: true
+    default: true       # set to 'false' if you don't wan't automacit builds.
 
   - name: 'CustomerA'
     displayName: 'Customer A'
     type: boolean
-    default: false
+    default: false # set to 'true' if you want automatic builds.
 #Add a parameter for each tenant
 
 variables:
