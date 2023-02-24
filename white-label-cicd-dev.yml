@@ -7,7 +7,7 @@ parameters:
   - name: 'CustomerA'
     displayName: 'Customer A'
     type: boolean
-    default: false # set to 'true' if you want automatic builds.
+    default: false      # set to 'true' if you want automatic builds.
 #Add a parameter for each tenant
 
 variables:
