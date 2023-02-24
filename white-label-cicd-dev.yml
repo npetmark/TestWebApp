@@ -213,14 +213,14 @@ stages:
                       persistCredentials: true
                       clean: true
                     
-                    - task: DownloadBuildArtifacts@1
-                      inputs:
-                        buildType: 'current'
-                        downloadType: 'specific'
-                        itemPattern: |
-                          ${{ parameter.Key }}*/*.apk
-                          ${{ parameter.Key }}*/*.ipa
-                        downloadPath: '$(System.ArtifactsDirectory)'
+                    # - task: DownloadBuildArtifacts@1
+                    #   inputs:
+                    #     buildType: 'current'
+                    #     downloadType: 'specific'
+                    #     itemPattern: |
+                    #       ${{ parameter.Key }}*/*.apk
+                    #       ${{ parameter.Key }}*/*.ipa
+                    #     downloadPath: '$(System.ArtifactsDirectory)'
                     - task: AzureKeyVault@2
                       inputs:
                         azureSubscription: 'BuzzWhiteLabelDev Azure RG'
@@ -292,6 +292,7 @@ stages:
                   releaseNotesInput: '$(Build.SourceVersionMessage)'
                   destinationType: 'store'
                   destinationStoreId: '$(ios-dev-test-storeid)'
+                continueOnError: true
               - task: AppCenterDistribute@3
                 displayName: Android App Center Distribute
                 inputs:
