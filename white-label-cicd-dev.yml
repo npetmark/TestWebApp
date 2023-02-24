@@ -5,7 +5,7 @@ parameters:
     default: true
 
   - name: 'CustomerA'
-    displayName: 'Partners Personnel'
+    displayName: 'Customer A'
     type: boolean
     default: false
 #Add a parameter for each tenant
