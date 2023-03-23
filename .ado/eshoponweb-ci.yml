@@ -119,7 +119,9 @@ stages:
     
 - stage: CodePush
   condition: succeededOrFailed()
-  dependsOn: []
+  dependsOn:    
+    - Build_ios
+    - Build_android
   displayName: CodePush
   jobs:
     - ${{ each parameter in parameters }}:
