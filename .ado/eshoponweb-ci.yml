@@ -130,7 +130,7 @@ stages:
           environment: approvals
 
           pool:
-            vmImage: 'windows-2019'
+            vmImage: 'macos-latest'
 
           strategy:
             runOnce:
@@ -169,7 +169,7 @@ stages:
           environment: approvals
 
           pool:
-            vmImage: 'windows-2019'
+            vmImage: 'macos-latest'
 
           strategy:
             runOnce:
