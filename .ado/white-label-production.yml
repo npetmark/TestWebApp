@@ -256,11 +256,11 @@ stages:
         - ${{ if eq(parameter.Value, true)}}:
           - deployment: ${{ parameter.Key}}
             environment: approvals
-            displayName: ${{ parameter.Key }}
-            timeoutInMinutes: 60
-            cancelTimeoutInMinutes: 2
-              pool:
-                vmImage: 'macOS-latest'
+            displayName: ${{ parameter.Key}}
+            
+            pool:
+              vmImage: 'macOS-latest'
+
               steps:
                 - checkout: self
                   persistCredentials: true
