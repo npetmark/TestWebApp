@@ -22,7 +22,7 @@ stages:
       - ${{ if eq(parameter.Value, true)}}:
         - job: ${{ parameter.Key }}
           displayName: ${{ parameter.Key }}
-          timeoutInMinutes: 90
+          timeoutInMinutes: 60
           cancelTimeoutInMinutes: 2
 
           pool:
