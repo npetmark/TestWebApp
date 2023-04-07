@@ -160,7 +160,7 @@ stages:
   dependsOn: 
     - Build_ios
     - Build_android
-    - CodePush
+    # - CodePush
   displayName: AppCenterDeploy
   jobs:
     - ${{ each parameter in parameters }}:
