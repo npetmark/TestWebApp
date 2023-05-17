@@ -171,7 +171,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "tw-frontdoor-dev" {
 
 ##############Storage Accoount Block###############
 resource "azurerm_storage_account" "tw-storage-account" {
-  name                = ${var.storage_account_name}${random_string.myrandom.id}
+  name                = "${var.storage_account_name}${random_string.myrandom.id}"
   resource_group_name = azurerm_resource_group.tw-rg-dev.name
 
   location                 = azurerm_resource_group.tw-rg-dev.location
