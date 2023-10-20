@@ -10,7 +10,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Build'
-        sh 'sh "dotnet restore ${workspace}**/*.sln'
+        sh 'sh "dotnet restore ${workspace}**/*.sln"'
         sh 'sh "msbuild.exe ${workspace}**/*.sln /nologo /nr:false /p:platform=\\"x64\\" /p:configuration=\\"release\\" /t:clean"'
       }
     }
