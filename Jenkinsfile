@@ -1,21 +1,27 @@
 pipeline {
   agent any
   stages {
+    stage('Check-out') {
+      steps {
+        git(url: 'https://github.com/npetmark/TestWebApp.git', branch: 'main')
+      }
+    }
+
     stage('Build') {
       steps {
-        echo 'Stage completed'
+        echo 'Build'
       }
     }
 
     stage('Test') {
       steps {
-        echo 'Stage completed'
+        echo 'Test'
       }
     }
 
     stage('Deploy') {
       steps {
-        echo 'Stage completed'
+        echo 'Test'
       }
     }
 
